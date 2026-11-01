@@ -1,0 +1,179 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #2f0000;
+  color: #ffe8a4;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes songhy-ambient-rise {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: var(--max-op, 0.3);
+  }
+  50% {
+    transform: translate3d(var(--sway-amp, 18px), -52vh, 0) rotate(12deg);
+  }
+  85% {
+    opacity: var(--max-op, 0.3);
+  }
+  100% {
+    transform: translate3d(calc(var(--sway-amp, 18px) * -0.6), -108vh, 0) rotate(-10deg);
+    opacity: 0;
+  }
+}
+
+@keyframes songhy-seal-pulse {
+  0%, 100% {
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+@keyframes songhy-foil-shine {
+  0% {
+    transform: translateX(-140px) skewX(-20deg);
+  }
+  100% {
+    transform: translateX(320px) skewX(-20deg);
+  }
+}
+
+@keyframes songhy-float-y {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes songhy-fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 20px, 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes songhy-modal-pop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+/* Blooming SVG Floral Keyframes */
+@keyframes songhy-petal-unfurl {
+  0% {
+    opacity: 0;
+    transform: scale(0.12) rotate(-22deg);
+  }
+  65% {
+    opacity: 1;
+    transform: scale(1.07) rotate(3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes songhy-flower-breathe {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.045) rotate(1.8deg);
+  }
+}
+
+@keyframes songhy-vine-grow {
+  0% {
+    stroke-dashoffset: 240;
+    opacity: 0.15;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes songhy-leaf-sprout {
+  0% {
+    opacity: 0;
+    transform: scale(0) rotate(-30deg);
+  }
+  75% {
+    opacity: 1;
+    transform: scale(1.1) rotate(4deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes songhy-pollen-twinkle {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.75);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
+
+/* Custom Oriental Gold Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(47, 0, 0, 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 232, 164, 0.35);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 232, 164, 0.65);
+}
+
+/* Force Mapbox GL canvas to stretch 100% edge-to-edge inside rounded frame */
+.mapboxgl-map,
+.mapboxgl-canvas-container,
+.mapboxgl-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+}

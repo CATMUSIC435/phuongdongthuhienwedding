@@ -1,0 +1,23 @@
+{
+  "name": "Thiệp Cưới Phạm Phương Đông & Nguyễn Thị Thu Hiền (24.12.2026)",
+  "short_name": "Đông & Hiền",
+  "description": "Trân trọng kính mời Quý khách đến dự Lễ Thành Hôn của Phạm Phương Đông & Nguyễn Thị Thu Hiền (24/12/2026 tại Xóm 3, An Thổ, Trà Câu, Quảng Ngãi • Tiệc Nhà Gái: Chiều 23/12/2026).",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#2F0000",
+  "theme_color": "#8C0000",
+  "lang": "vi",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/images/themes/song-hy-v2-red/double-happiness-light.webp",
+      "sizes": "192x192",
+      "type": "image/webp"
+    }
+  ]
+}
