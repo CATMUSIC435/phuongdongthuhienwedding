@@ -18,9 +18,9 @@ export function ChillAudioEngine() {
     const el = audioElRef.current;
     if (!el) return;
 
-    // Pure original audio playback without any speed or pitch intervention
+    // Pure original audio playback at a gentle, soft background level (~30%)
     el.playbackRate = 1.0;
-    el.volume = Math.min(1, Math.max(0, musicVolume));
+    el.volume = Math.min(0.35, Math.max(0, musicVolume * 0.4));
 
     if (isPlayingMusic) {
       el.play().catch(() => {

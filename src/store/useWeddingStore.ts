@@ -118,7 +118,7 @@ export const useWeddingStore = create<WeddingStoreState>()(
       guestRelation: "Trân Trọng Kính Mời",
 
       isPlayingMusic: false,
-      musicVolume: 0.85,
+      musicVolume: 0.32,
       chillAudioMode: "tbaye-chill",
       particlesEnabled: true,
       themeId: "crimson-red",

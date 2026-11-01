@@ -177,3 +177,17 @@ body {
   height: 100% !important;
   display: block !important;
 }
+
+/* Compact Mapbox Venue Popup Pill */
+.mapboxgl-popup-content {
+  padding: 5px 10px !important;
+  border-radius: 10px !important;
+  background: rgba(255, 250, 241, 0.96) !important;
+  border: 1px solid rgba(140, 0, 0, 0.25) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28) !important;
+}
+
+.mapboxgl-popup-tip {
+  border-top-color: rgba(255, 250, 241, 0.96) !important;
+  border-width: 6px !important;
+}

@@ -126,34 +126,35 @@ export function MapboxWeddingVenue() {
       "top-right"
     );
 
-    // Custom Oriental Double-Happiness 囍 Golden Marker
+    // Compact Oriental Double-Happiness 囍 Golden Marker
     const markerEl = document.createElement("div");
-    markerEl.style.width = "46px";
-    markerEl.style.height = "46px";
+    markerEl.style.width = "28px";
+    markerEl.style.height = "28px";
     markerEl.style.borderRadius = "9999px";
     markerEl.style.backgroundColor = "#8C0000";
-    markerEl.style.border = "2.5px solid #FFE8A4";
+    markerEl.style.border = "1.5px solid #FFE8A4";
     markerEl.style.boxShadow =
-      "0 0 0 6px rgba(255, 232, 164, 0.3), 0 8px 20px rgba(0,0,0,0.45)";
+      "0 0 0 3px rgba(255, 232, 164, 0.25), 0 4px 10px rgba(0,0,0,0.4)";
     markerEl.style.display = "flex";
     markerEl.style.alignItems = "center";
     markerEl.style.justifyContent = "center";
     markerEl.style.color = "#FFE8A4";
     markerEl.style.fontWeight = "bold";
-    markerEl.style.fontSize = "21px";
+    markerEl.style.fontSize = "13px";
     markerEl.style.fontFamily = "serif";
     markerEl.style.cursor = "pointer";
     markerEl.title = "Vị trí Lễ Cưới Phương Đông & Thu Hiền";
     markerEl.innerText = "囍";
 
     const popup = new mapboxgl.Popup({
-      offset: 28,
+      offset: 16,
       closeButton: false,
       closeOnClick: false,
+      maxWidth: "170px",
     }).setHTML(
-      `<div style="padding:5px 8px;color:#5A0000;font-family:serif;text-align:center;">
-        <div style="font-weight:bold;font-size:12.5px;color:#8C0000;">囍 LỄ CƯỚI PHƯƠNG ĐÔNG &amp; THU HIỀN</div>
-        <div style="font-size:11px;margin-top:2px;">24/12/2026</div>
+      `<div style="color:#5A0000;font-family:serif;text-align:center;line-height:1.25;white-space:nowrap;">
+        <div style="font-weight:bold;font-size:10.5px;color:#8C0000;">囍 Phương Đông &amp; Thu Hiền</div>
+        <div style="font-size:9.5px;opacity:0.8;">24/12/2026</div>
       </div>`
     );
 
