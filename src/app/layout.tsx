@@ -183,7 +183,6 @@ export default function RootLayout({
           href="/images/photos/photo-1.jpg"
           type="image/jpeg"
         />
-        <link rel="dns-prefetch" href="https://img.vietqr.io" />
         <link rel="dns-prefetch" href="https://api.mapbox.com" />
         <script
           type="application/ld+json"
