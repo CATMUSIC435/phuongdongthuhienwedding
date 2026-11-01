@@ -31,46 +31,47 @@ export function ReceptionCalendarSection() {
   const [guestsCount, setGuestsCount] = useState(1);
   const [side, setSide] = useState<"groom" | "bride">("groom");
   const [dietaryNotes, setDietaryNotes] = useState("");
+  const [nameError, setNameError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedSuccess, setSubmittedSuccess] = useState(false);
+
+  const nameInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (guestName && !rsvpName) {
       setRsvpName(guestName);
+      setNameError("");
     }
   }, [guestName, rsvpName]);
 
-  const handleRsvpSubmit = (e: React.FormEvent) => {
+  const handleRsvpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     const cleanName = rsvpName.trim();
     const cleanNotes = dietaryNotes.trim();
-    if (!cleanName) return;
+    const validGuestsCount = Math.min(10, Math.max(1, Number(guestsCount) || 1));
+
+    if (!cleanName) {
+      setNameError("Vui lòng nhập họ và tên quý khách trước khi gửi.");
+      showToast("Vui lòng nhập họ và tên quý khách trước khi gửi!");
+      nameInputRef.current?.focus();
+      return;
+    }
+
+    setNameError("");
+    setIsSubmitting(true);
 
     submitRsvp({
       name: cleanName,
       phone: rsvpPhone.trim(),
       attending,
-      guestsCount,
+      guestsCount: validGuestsCount,
       side,
       dietaryNotes: cleanNotes,
     });
     setSubmittedSuccess(true);
     showToast("Đã gửi xác nhận tham dự thành công! Cảm ơn quý khách.");
-
-    // Gửi thông báo xác nhận tham dự qua Gmail App Mail
-    fetch("/api/wish", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "rsvp",
-        name: cleanName,
-        attending,
-        guestsCount,
-        side,
-        dietaryNotes: cleanNotes,
-      }),
-    }).catch(() => {
-      // ignore network error on client
-    });
 
     try {
       confetti({
@@ -82,6 +83,27 @@ export function ReceptionCalendarSection() {
     } catch {
       // ignore
     }
+
+    // Gửi thông báo xác nhận tham dự qua Gmail App Mail (phuongdongiot@gmail.com)
+    try {
+      await fetch("/api/wish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "rsvp",
+          name: cleanName,
+          attending,
+          guestsCount: validGuestsCount,
+          side,
+          dietaryNotes: cleanNotes,
+        }),
+      });
+    } catch {
+      // ignore network error on client
+    } finally {
+      setIsSubmitting(false);
+    }
+
     setTimeout(() => {
       setSubmittedSuccess(false);
       setRsvpModalOpen(false);
@@ -461,6 +483,7 @@ export function ReceptionCalendarSection() {
                 ) : (
                   <form
                     onSubmit={handleRsvpSubmit}
+                    noValidate
                     className="p-5 sm:p-6 space-y-4 text-sm font-sans"
                   >
                     <div>
@@ -468,13 +491,28 @@ export function ReceptionCalendarSection() {
                         Họ và tên quý khách *
                       </label>
                       <input
+                        ref={nameInputRef}
                         type="text"
-                        required
                         value={rsvpName}
-                        onChange={(e) => setRsvpName(e.target.value)}
+                        onChange={(e) => {
+                          setRsvpName(e.target.value);
+                          if (nameError && e.target.value.trim()) {
+                            setNameError("");
+                          }
+                        }}
+                        aria-invalid={Boolean(nameError)}
                         placeholder="Nhập tên của bạn..."
-                        className="w-full rounded-lg border border-[#920002]/30 bg-white px-3.5 py-2 focus:outline-none focus:ring-2 focus:ring-[#920002]"
+                        className={`w-full rounded-lg border bg-white px-3.5 py-2 focus:outline-none focus:ring-2 ${
+                          nameError
+                            ? "border-[#D90429] focus:ring-[#D90429]"
+                            : "border-[#920002]/30 focus:ring-[#920002]"
+                        }`}
                       />
+                      {nameError && (
+                        <p className="mt-1 text-xs text-[#D90429] font-medium">
+                          * {nameError}
+                        </p>
+                      )}
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -566,13 +604,14 @@ export function ReceptionCalendarSection() {
 
                     <button
                       type="submit"
+                      disabled={isSubmitting}
                       style={{
                         backgroundColor: theme.paperTextPrimary,
                         color: theme.paperBg,
                       }}
-                      className="w-full py-2.5 rounded-lg font-serif font-bold uppercase tracking-wider shadow-md hover:opacity-95 transition-opacity cursor-pointer"
+                      className="w-full py-2.5 rounded-lg font-serif font-bold uppercase tracking-wider shadow-md hover:opacity-95 disabled:opacity-65 transition-opacity cursor-pointer"
                     >
-                      Gửi Xác Nhận
+                      {isSubmitting ? "Đang Gửi..." : "Gửi Xác Nhận"}
                     </button>
                   </form>
                 )}

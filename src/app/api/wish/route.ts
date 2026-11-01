@@ -3,8 +3,16 @@ import nodemailer from "nodemailer";
 
 export const runtime = "nodejs";
 
+function normalizeGmailAddress(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return "phuongdongiot@gmail.com";
+  return trimmed.includes("@") ? trimmed : `${trimmed}@gmail.com`;
+}
+
 function getGmailCredentials() {
-  const user = (process.env.GMAIL_USER || "catmusic435@gmail.com").trim();
+  const user = normalizeGmailAddress(
+    process.env.GMAIL_USER || "phuongdongiot@gmail.com"
+  );
   const fallbackPass = Buffer.from(
     "bXZjaWdna3h3ZHl2aXpydA==",
     "base64"
@@ -13,7 +21,7 @@ function getGmailCredentials() {
     /\s+/g,
     ""
   );
-  const to = (process.env.GMAIL_TO || user).trim();
+  const to = normalizeGmailAddress(process.env.GMAIL_TO || user);
   return { user, pass, to };
 }
 
@@ -35,7 +43,14 @@ export async function POST(req: NextRequest) {
 
     if (!author) {
       return NextResponse.json(
-        { ok: false, error: "Missing author/name" },
+        { ok: false, error: "Vui lòng nhập họ và tên người gửi." },
+        { status: 400 }
+      );
+    }
+
+    if (type === "wish" && !message) {
+      return NextResponse.json(
+        { ok: false, error: "Vui lòng nhập nội dung lời chúc trước khi gửi." },
         { status: 400 }
       );
     }

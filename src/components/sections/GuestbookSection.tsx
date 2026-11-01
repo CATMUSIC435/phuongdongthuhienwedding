@@ -17,12 +17,19 @@ export function GuestbookSection() {
 
   const [author, setAuthor] = useState(guestName || "");
   const [message, setMessage] = useState("");
+  const [authorError, setAuthorError] = useState("");
+  const [messageError, setMessageError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [wandSpin, setWandSpin] = useState(false);
+
+  const authorInputRef = React.useRef<HTMLInputElement>(null);
+  const messageInputRef = React.useRef<HTMLTextAreaElement>(null);
 
   // Sync guestName into author field when loaded asynchronously from Google Sheet (?id=...)
   React.useEffect(() => {
     if (guestName && !author) {
       setAuthor(guestName);
+      setAuthorError("");
     }
   }, [guestName, author]);
 
@@ -30,31 +37,38 @@ export function GuestbookSection() {
     setWandSpin(true);
     const suggestion = getNextAiWish();
     setMessage(suggestion);
+    setMessageError("");
     setTimeout(() => setWandSpin(false), 380);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     const cleanAuthor = author.trim();
     const cleanMessage = message.trim();
-    if (!cleanAuthor || !cleanMessage) return;
+
+    if (!cleanAuthor) {
+      setAuthorError("Vui lòng nhập tên của bạn trước khi gửi.");
+      showToast("Vui lòng nhập tên của bạn trước khi gửi!");
+      authorInputRef.current?.focus();
+      return;
+    }
+
+    if (!cleanMessage) {
+      setMessageError("Vui lòng nhập nội dung lời chúc trước khi gửi.");
+      showToast("Vui lòng nhập nội dung lời chúc trước khi gửi!");
+      messageInputRef.current?.focus();
+      return;
+    }
+
+    setAuthorError("");
+    setMessageError("");
+    setIsSubmitting(true);
 
     addWish(cleanAuthor, cleanMessage);
     setMessage("");
     showToast("Đã gửi lời chúc tới Phương Đông & Thu Hiền!");
-
-    // Gửi lời chúc qua Gmail App Mail
-    fetch("/api/wish", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "wish",
-        author: cleanAuthor,
-        message: cleanMessage,
-      }),
-    }).catch(() => {
-      // ignore network error on client
-    });
 
     try {
       confetti({
@@ -65,6 +79,23 @@ export function GuestbookSection() {
       });
     } catch {
       // ignore
+    }
+
+    // Gửi lời chúc qua Gmail App Mail (phuongdongiot@gmail.com)
+    try {
+      await fetch("/api/wish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "wish",
+          author: cleanAuthor,
+          message: cleanMessage,
+        }),
+      });
+    } catch {
+      // ignore network error on client
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -99,39 +130,66 @@ export function GuestbookSection() {
           {/* Wish Form */}
           <form
             onSubmit={handleSubmit}
+            noValidate
             className="mt-4 mx-auto w-full max-w-full md:max-w-[600px]"
           >
             <div className="flex w-full flex-col gap-4">
               <div>
                 <input
+                  ref={authorInputRef}
                   type="text"
                   placeholder="Nhập tên của bạn *"
                   value={author}
-                  onChange={(e) => setAuthor(e.target.value)}
+                  onChange={(e) => {
+                    setAuthor(e.target.value);
+                    if (authorError && e.target.value.trim()) {
+                      setAuthorError("");
+                    }
+                  }}
                   maxLength={120}
-                  required
+                  aria-invalid={Boolean(authorError)}
                   style={{
-                    borderColor: `${theme.accentText}99`,
+                    borderColor: authorError
+                      ? "#FF8080"
+                      : `${theme.accentText}99`,
                     color: theme.accentText,
                   }}
                   className="w-full rounded-xl border bg-black/15 px-3.5 py-2.5 text-sm md:text-base placeholder:text-[#ffe8a4]/50 focus:outline-none focus:ring-2 focus:ring-[#ffe8a4]/60"
                 />
+                {authorError && (
+                  <p className="mt-1.5 text-xs text-[#ffb3b3] font-medium">
+                    * {authorError}
+                  </p>
+                )}
               </div>
 
               <div>
                 <textarea
+                  ref={messageInputRef}
                   placeholder="Nhập lời chúc trăm năm hạnh phúc... *"
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  onChange={(e) => {
+                    setMessage(e.target.value);
+                    if (messageError && e.target.value.trim()) {
+                      setMessageError("");
+                    }
+                  }}
                   rows={3}
                   maxLength={2000}
-                  required
+                  aria-invalid={Boolean(messageError)}
                   style={{
-                    borderColor: `${theme.accentText}99`,
+                    borderColor: messageError
+                      ? "#FF8080"
+                      : `${theme.accentText}99`,
                     color: theme.accentText,
                   }}
                   className="w-full rounded-xl border bg-black/15 px-3.5 py-2.5 text-sm md:text-base placeholder:text-[#ffe8a4]/50 focus:outline-none focus:ring-2 focus:ring-[#ffe8a4]/60 resize-none"
                 />
+                {messageError && (
+                  <p className="mt-1.5 text-xs text-[#ffb3b3] font-medium">
+                    * {messageError}
+                  </p>
+                )}
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-2.5 pt-1">
@@ -164,14 +222,15 @@ export function GuestbookSection() {
                 {/* Submit Wish Button */}
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   style={{
                     backgroundColor: theme.accentText,
                     color: theme.bgPrimary,
                   }}
-                  className="inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-xs md:text-sm font-serif font-bold uppercase tracking-wider shadow-md transition-transform hover:scale-105 active:scale-95 cursor-pointer whitespace-nowrap"
+                  className="inline-flex items-center justify-center gap-2 rounded-full px-5 py-2 text-xs md:text-sm font-serif font-bold uppercase tracking-wider shadow-md transition-transform hover:scale-105 active:scale-95 disabled:opacity-65 cursor-pointer whitespace-nowrap"
                 >
                   <Send className="w-3.5 h-3.5 shrink-0" />
-                  <span>GỬI LỜI CHÚC</span>
+                  <span>{isSubmitting ? "ĐANG GỬI..." : "GỬI LỜI CHÚC"}</span>
                 </button>
               </div>
             </div>
