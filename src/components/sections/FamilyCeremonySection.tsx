@@ -81,11 +81,17 @@ export function FamilyCeremonySection() {
                     {parent}
                   </span>
                 ))}
+                <span
+                  className="mt-0.5 text-[10.5px] sm:text-[11.5px] md:text-[13px] leading-snug opacity-80 font-medium"
+                  style={{ color: theme.paperTextSecondary }}
+                >
+                  {INITIAL_WEDDING_DATA.groomParentsAddress}
+                </span>
               </div>
 
               {/* Vertical Gold Divider */}
               <div
-                className="h-[60px] w-px self-center md:h-[76px]"
+                className="h-[86px] w-px self-center md:h-[106px]"
                 style={{ backgroundColor: theme.accentRose }}
               />
 
@@ -106,6 +112,12 @@ export function FamilyCeremonySection() {
                     {parent}
                   </span>
                 ))}
+                <span
+                  className="mt-0.5 text-[10.5px] sm:text-[11.5px] md:text-[13px] leading-snug opacity-80 font-medium"
+                  style={{ color: theme.paperTextSecondary }}
+                >
+                  {INITIAL_WEDDING_DATA.brideParentsAddress}
+                </span>
               </div>
             </div>
 

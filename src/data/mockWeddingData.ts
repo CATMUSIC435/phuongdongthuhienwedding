@@ -101,9 +101,11 @@ export const INITIAL_WEDDING_DATA = {
   groomShortName: "Phương Đông",
   groomFullName: "Phạm Phương Đông",
   groomParents: ["Phạm Hùng", "Nguyễn Thị Vân"],
+  groomParentsAddress: "TDP An Thổ - phường Trà Câu - Quảng Ngãi",
   brideShortName: "Thu Hiền",
   brideFullName: "Nguyễn Thị Thu Hiền",
   brideParents: ["Nguyễn Lệ", "Nguyễn Thị Mai"],
+  brideParentsAddress: "TDP An Thổ - phường Trà Câu - Quảng Ngãi",
   announcementText:
     "Hai gia đình trân trọng báo tin lễ thành hôn của hai con chúng tôi",
   weddingDateDisplay: "24 tháng 12, 2026",
@@ -130,13 +132,19 @@ export const INITIAL_WEDDING_DATA = {
   // December 1, 2026 is Tuesday (T3), so 1 empty slot (T2)
   calendarEmptyLeadingSlots: 1,
   calendarDaysInMonth: 31,
-  venueName: "Xóm 3, An Thổ, Trà Câu",
+  venueName: "TDP An Thổ - phường Trà Câu - Quảng Ngãi",
   venueCity: "Thị xã Đức Phổ, Quảng Ngãi, Việt Nam",
-  venueFullAddress: "Xóm 3, An Thổ, Trà Câu, Quảng Ngãi, Việt Nam",
+  venueFullAddress: "TDP An Thổ - phường Trà Câu - Quảng Ngãi",
+  // Tọa độ Nhà Trai (14.878851, 108.9506447)
   venueLat: 14.878851,
   venueLng: 108.9506447,
   googleMapsDirUrl:
     "https://www.google.com/maps/dir/?api=1&destination=14.878851,108.9506447",
+  // Tọa độ Nhà Gái (14.875863461851074, 108.95685423178892)
+  brideVenueLat: 14.875863461851074,
+  brideVenueLng: 108.95685423178892,
+  brideGoogleMapsDirUrl:
+    "https://www.google.com/maps/dir/?api=1&destination=14.875863461851074,108.95685423178892",
   googleCalendarUrl:
     "https://www.google.com/calendar/render?action=TEMPLATE&text=%C4%90%C3%A1m%20c%C6%B0%E1%BB%9Bi%20Ph%E1%BA%A1m%20Ph%C6%B0%C6%A1ng%20%C4%90%C3%B4ng%20%26%20Nguy%E1%BB%85n%20Th%E1%BB%8B%20Thu%20Hi%E1%BB%81n&dates=20261224T023000Z/20261224T070000Z&ctz=Asia/Ho_Chi_Minh&details=L%E1%BB%85%20th%C3%A0nh%20h%C3%B4n%20c%E1%BB%A7a%20Ph%E1%BA%A1m%20Ph%C6%B0%C6%A1ng%20%C4%90%C3%B4ng%20%26%20Nguy%E1%BB%85n%20Th%E1%BB%8B%20Thu%20Hi%E1%BB%81n%20t%E1%BA%A1i%20X%C3%B3m%203%2C%20An%20Th%E1%BB%95%2C%20Tr%C3%A0%20C%C3%A2u%2C%20Qu%E1%BA%A3ng%20Ng%C3%A3i%20(Nh%C3%A0%20g%C3%A1i%20t%E1%BB%95%20ch%E1%BB%A9c%20chi%E1%BB%81u%2023%2F12%2F2026)&location=14.878851,108.9506447",
   heroPhoto: "/images/photos/photo-1.jpg",

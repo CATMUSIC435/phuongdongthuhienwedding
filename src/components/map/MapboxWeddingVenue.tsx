@@ -8,6 +8,7 @@ import {
   ExternalLink,
   Layers,
   Loader2,
+  MapPin,
   Navigation,
   Route,
 } from "lucide-react";
@@ -20,9 +21,12 @@ type MapStyleId =
   | "mapbox://styles/mapbox/satellite-streets-v12"
   | "mapbox://styles/mapbox/streets-v12";
 
+type VenueSide = "groom" | "bride";
+
 interface RouteSummary {
   distanceKm: string;
   durationText: string;
+  sideLabel: string;
 }
 
 export function MapboxWeddingVenue() {
@@ -31,17 +35,31 @@ export function MapboxWeddingVenue() {
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const groomMarkerRef = useRef<mapboxgl.Marker | null>(null);
+  const brideMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const userMarkerRef = useRef<mapboxgl.Marker | null>(null);
-  const userCoordsRef = useRef<[number, number] | null>(null);
 
+  const [activeSide, setActiveSide] = useState<VenueSide>("groom");
   const [mapStyle, setMapStyle] = useState<MapStyleId>(
     "mapbox://styles/mapbox/satellite-streets-v12"
   );
   const [isRouting, setIsRouting] = useState(false);
   const [routeSummary, setRouteSummary] = useState<RouteSummary | null>(null);
 
-  const lng = INITIAL_WEDDING_DATA.venueLng; // 108.9506447
-  const lat = INITIAL_WEDDING_DATA.venueLat; // 14.878851
+  // Groom's Family (Nhà Trai): 14.878851, 108.9506447
+  const groomLng = INITIAL_WEDDING_DATA.venueLng;
+  const groomLat = INITIAL_WEDDING_DATA.venueLat;
+
+  // Bride's Family (Nhà Gái): 14.875863461851074, 108.95685423178892
+  const brideLng = INITIAL_WEDDING_DATA.brideVenueLng;
+  const brideLat = INITIAL_WEDDING_DATA.brideVenueLat;
+
+  const targetLng = activeSide === "groom" ? groomLng : brideLng;
+  const targetLat = activeSide === "groom" ? groomLat : brideLat;
+  const targetGoogleMapsUrl =
+    activeSide === "groom"
+      ? INITIAL_WEDDING_DATA.googleMapsDirUrl
+      : INITIAL_WEDDING_DATA.brideGoogleMapsDirUrl;
 
   // Helper to draw GeoJSON route on Mapbox instance
   const renderRouteLayer = (
@@ -80,7 +98,7 @@ export function MapboxWeddingVenue() {
         },
         paint: {
           "line-color": "#8C0000",
-          "line-width": 8,
+          "line-width": 7,
           "line-opacity": 0.85,
         },
       });
@@ -95,7 +113,7 @@ export function MapboxWeddingVenue() {
         },
         paint: {
           "line-color": "#FFE8A4",
-          "line-width": 4.5,
+          "line-width": 4,
           "line-opacity": 0.98,
         },
       });
@@ -108,15 +126,18 @@ export function MapboxWeddingVenue() {
 
     mapboxgl.accessToken = MAPBOX_TOKEN;
 
+    // Center initially between Groom & Bride venues so both pins are visible
+    const midLng = (groomLng + brideLng) / 2;
+    const midLat = (groomLat + brideLat) / 2;
+
     const map = new mapboxgl.Map({
       container,
       style: mapStyle,
-      center: [lng, lat],
-      zoom: 16.3,
-      pitch: 52,
-      bearing: -12,
+      center: [midLng, midLat],
+      zoom: 15.1,
+      pitch: 48,
+      bearing: -10,
       antialias: true,
-      attributionControl: false,
     });
 
     mapRef.current = map;
@@ -126,51 +147,94 @@ export function MapboxWeddingVenue() {
       "top-right"
     );
 
-    // Compact Oriental Double-Happiness 囍 Golden Marker
-    const markerEl = document.createElement("div");
-    markerEl.style.width = "28px";
-    markerEl.style.height = "28px";
-    markerEl.style.borderRadius = "9999px";
-    markerEl.style.backgroundColor = "#8C0000";
-    markerEl.style.border = "1.5px solid #FFE8A4";
-    markerEl.style.boxShadow =
-      "0 0 0 3px rgba(255, 232, 164, 0.25), 0 4px 10px rgba(0,0,0,0.4)";
-    markerEl.style.display = "flex";
-    markerEl.style.alignItems = "center";
-    markerEl.style.justifyContent = "center";
-    markerEl.style.color = "#FFE8A4";
-    markerEl.style.fontWeight = "bold";
-    markerEl.style.fontSize = "13px";
-    markerEl.style.fontFamily = "serif";
-    markerEl.style.cursor = "pointer";
-    markerEl.title = "Vị trí Lễ Cưới Phương Đông & Thu Hiền";
-    markerEl.innerText = "囍";
+    const createCompactMarkerElement = (bgColor: string, titleText: string) => {
+      const el = document.createElement("div");
+      el.style.width = "28px";
+      el.style.height = "28px";
+      el.style.borderRadius = "9999px";
+      el.style.backgroundColor = bgColor;
+      el.style.border = "1.5px solid #FFE8A4";
+      el.style.boxShadow =
+        "0 0 0 3px rgba(255, 232, 164, 0.25), 0 4px 10px rgba(0,0,0,0.4)";
+      el.style.display = "flex";
+      el.style.alignItems = "center";
+      el.style.justifyContent = "center";
+      el.style.color = "#FFE8A4";
+      el.style.fontWeight = "bold";
+      el.style.fontSize = "13px";
+      el.style.fontFamily = "serif";
+      el.style.cursor = "pointer";
+      el.title = titleText;
+      el.innerText = "囍";
+      return el;
+    };
 
-    const popup = new mapboxgl.Popup({
+    // 1. Groom's Family Marker (Nhà Trai - 14.878851, 108.9506447)
+    const groomEl = createCompactMarkerElement(
+      "#8C0000",
+      "Nhà Trai • Phạm Phương Đông (24/12/2026)"
+    );
+    const groomPopup = new mapboxgl.Popup({
       offset: 16,
       closeButton: false,
       closeOnClick: false,
-      maxWidth: "170px",
+      maxWidth: "165px",
     }).setHTML(
       `<div style="color:#5A0000;font-family:serif;text-align:center;line-height:1.25;white-space:nowrap;">
-        <div style="font-weight:bold;font-size:10.5px;color:#8C0000;">囍 Phương Đông &amp; Thu Hiền</div>
-        <div style="font-size:9.5px;opacity:0.8;">24/12/2026</div>
+        <div style="font-weight:bold;font-size:10.5px;color:#8C0000;">囍 Nhà Trai • Phương Đông</div>
+        <div style="font-size:9px;opacity:0.85;">09:30 &amp; 11:00 • 24/12/2026</div>
       </div>`
     );
-
-    const marker = new mapboxgl.Marker({ element: markerEl })
-      .setLngLat([lng, lat])
-      .setPopup(popup)
+    const groomMarker = new mapboxgl.Marker({ element: groomEl })
+      .setLngLat([groomLng, groomLat])
+      .setPopup(groomPopup)
       .addTo(map);
+    groomMarkerRef.current = groomMarker;
+    groomMarker.togglePopup();
 
-    marker.togglePopup();
-    markerEl.addEventListener("click", () => {
+    groomEl.addEventListener("click", () => {
+      setActiveSide("groom");
       map.flyTo({
-        center: [lng, lat],
-        zoom: 17.4,
-        pitch: 60,
-        bearing: 15,
-        duration: 1800,
+        center: [groomLng, groomLat],
+        zoom: 17.1,
+        pitch: 56,
+        bearing: 12,
+        duration: 1500,
+        essential: true,
+      });
+    });
+
+    // 2. Bride's Family Marker (Nhà Gái - 14.875863461851074, 108.95685423178892)
+    const brideEl = createCompactMarkerElement(
+      "#B31237",
+      "Nhà Gái • Nguyễn Thị Thu Hiền (15:00 Chiều 23/12/2026)"
+    );
+    const bridePopup = new mapboxgl.Popup({
+      offset: 16,
+      closeButton: false,
+      closeOnClick: false,
+      maxWidth: "165px",
+    }).setHTML(
+      `<div style="color:#5A0000;font-family:serif;text-align:center;line-height:1.25;white-space:nowrap;">
+        <div style="font-weight:bold;font-size:10.5px;color:#B31237;">囍 Nhà Gái • Thu Hiền</div>
+        <div style="font-size:9px;opacity:0.85;">15:00 Chiều • 23/12/2026</div>
+      </div>`
+    );
+    const brideMarker = new mapboxgl.Marker({ element: brideEl })
+      .setLngLat([brideLng, brideLat])
+      .setPopup(bridePopup)
+      .addTo(map);
+    brideMarkerRef.current = brideMarker;
+    brideMarker.togglePopup();
+
+    brideEl.addEventListener("click", () => {
+      setActiveSide("bride");
+      map.flyTo({
+        center: [brideLng, brideLat],
+        zoom: 17.1,
+        pitch: 56,
+        bearing: -14,
+        duration: 1500,
         essential: true,
       });
     });
@@ -204,7 +268,6 @@ export function MapboxWeddingVenue() {
       }
     });
 
-    // Ensure Mapbox canvas always stretches 100% edge-to-edge without feedback loops
     const resizeObserver = new ResizeObserver((entries) => {
       if (disposed) return;
       const rect = entries[0]?.contentRect;
@@ -233,45 +296,70 @@ export function MapboxWeddingVenue() {
       }
       mapRef.current = null;
     };
-  }, [lng, lat, mapStyle]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const handleToggleStyle = () => {
-    setMapStyle((prev) =>
-      prev === "mapbox://styles/mapbox/satellite-streets-v12"
-        ? "mapbox://styles/mapbox/streets-v12"
-        : "mapbox://styles/mapbox/satellite-streets-v12"
-    );
-  };
-
-  const handleFlyToVenue = () => {
+  const handleSelectSide = (side: VenueSide) => {
+    setActiveSide(side);
     const map = mapRef.current;
     if (!map) return;
+
+    const destLng = side === "groom" ? groomLng : brideLng;
+    const destLat = side === "groom" ? groomLat : brideLat;
+
     map.flyTo({
-      center: [lng, lat],
-      zoom: 17.5,
-      pitch: 62,
-      bearing: 20,
-      duration: 2000,
+      center: [destLng, destLat],
+      zoom: 16.8,
+      pitch: 54,
+      bearing: side === "groom" ? 10 : -12,
+      duration: 1400,
       essential: true,
     });
   };
 
-  // Interactive Live Route Calculation using Mapbox Directions API
+  // Switch between Satellite 3D and Streets
+  const handleToggleStyle = () => {
+    const nextStyle: MapStyleId =
+      mapStyle === "mapbox://styles/mapbox/satellite-streets-v12"
+        ? "mapbox://styles/mapbox/streets-v12"
+        : "mapbox://styles/mapbox/satellite-streets-v12";
+    setMapStyle(nextStyle);
+    if (mapRef.current) {
+      mapRef.current.setStyle(nextStyle);
+    }
+  };
+
+  const handleShowBothVenues = () => {
+    const map = mapRef.current;
+    if (!map) return;
+    const bounds = new mapboxgl.LngLatBounds();
+    bounds.extend([groomLng, groomLat]);
+    bounds.extend([brideLng, brideLat]);
+    map.fitBounds(bounds, {
+      padding: 64,
+      pitch: 46,
+      duration: 1400,
+    });
+  };
+
+  // Request user geolocation & draw live driving route to selected venue (Nhà Trai or Nhà Gái)
   const handleDrawLiveRoute = () => {
-    if (typeof window === "undefined" || !("geolocation" in navigator)) {
-      window.open(INITIAL_WEDDING_DATA.googleMapsDirUrl, "_blank");
+    if (!navigator.geolocation) {
+      window.open(targetGoogleMapsUrl, "_blank");
       return;
     }
 
+    const sideLabel = activeSide === "groom" ? "Nhà Trai" : "Nhà Gái";
     setIsRouting(true);
+    showToast(`Đang xác định vị trí để vẽ đường tới ${sideLabel}...`);
+
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const userLng = pos.coords.longitude;
         const userLat = pos.coords.latitude;
-        userCoordsRef.current = [userLng, userLat];
 
         try {
-          const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${userLng},${userLat};${lng},${lat}?geometries=geojson&overview=full&language=vi&access_token=${MAPBOX_TOKEN}`;
+          const url = `https://api.mapbox.com/directions/v5/mapbox/driving/${userLng},${userLat};${targetLng},${targetLat}?steps=true&geometries=geojson&overview=full&access_token=${MAPBOX_TOKEN}`;
           const res = await fetch(url);
           const data = await res.json();
           const route = data?.routes?.[0];
@@ -280,30 +368,28 @@ export function MapboxWeddingVenue() {
             const map = mapRef.current;
             renderRouteLayer(map, route.geometry);
 
-            // Place or update Guest Origin Marker
             if (userMarkerRef.current) {
               userMarkerRef.current.remove();
             }
             const originEl = document.createElement("div");
-            originEl.style.width = "18px";
-            originEl.style.height = "18px";
+            originEl.style.width = "16px";
+            originEl.style.height = "16px";
             originEl.style.borderRadius = "9999px";
             originEl.style.backgroundColor = "#3B82F6";
-            originEl.style.border = "3px solid #FFFFFF";
+            originEl.style.border = "2.5px solid #FFFFFF";
             originEl.style.boxShadow = "0 0 0 4px rgba(59,130,246,0.4)";
 
             userMarkerRef.current = new mapboxgl.Marker({ element: originEl })
               .setLngLat([userLng, userLat])
               .addTo(map);
 
-            // Fit bounds to show both Guest Location & Wedding Venue
             const bounds = new mapboxgl.LngLatBounds();
             bounds.extend([userLng, userLat]);
-            bounds.extend([lng, lat]);
+            bounds.extend([targetLng, targetLat]);
             map.fitBounds(bounds, {
               padding: 54,
               pitch: 42,
-              duration: 2000,
+              duration: 1800,
             });
 
             const km = (route.distance / 1000).toFixed(1);
@@ -313,28 +399,77 @@ export function MapboxWeddingVenue() {
             const durationText =
               hours > 0 ? `${hours} giờ ${remMins} phút` : `${mins} phút`;
 
-            setRouteSummary({ distanceKm: `${km} km`, durationText });
-            showToast(`Đã tìm thấy lộ trình (${km} km • ${durationText})`);
+            setRouteSummary({
+              distanceKm: `${km} km`,
+              durationText,
+              sideLabel,
+            });
+            showToast(
+              `Lộ trình tới ${sideLabel}: ${km} km • ${durationText}`
+            );
           } else {
-            window.open(INITIAL_WEDDING_DATA.googleMapsDirUrl, "_blank");
+            window.open(targetGoogleMapsUrl, "_blank");
           }
         } catch {
-          window.open(INITIAL_WEDDING_DATA.googleMapsDirUrl, "_blank");
+          window.open(targetGoogleMapsUrl, "_blank");
         } finally {
           setIsRouting(false);
         }
       },
       () => {
         setIsRouting(false);
-        showToast("Mở Google Maps Chỉ Đường tới lễ cưới...");
-        window.open(INITIAL_WEDDING_DATA.googleMapsDirUrl, "_blank");
+        showToast(`Mở Google Maps Chỉ Đường tới ${sideLabel}...`);
+        window.open(targetGoogleMapsUrl, "_blank");
       },
       { enableHighAccuracy: true, timeout: 8000 }
     );
   };
 
   return (
-    <div className="w-full flex flex-col items-center gap-3.5">
+    <div className="w-full flex flex-col items-center gap-3">
+      {/* Venue Selector Tabs: Nhà Trai vs Nhà Gái */}
+      <div className="grid grid-cols-2 gap-2 w-full max-w-[365px] md:max-w-[490px]">
+        {[
+          {
+            id: "groom" as VenueSide,
+            title: "Nhà Trai • Phương Đông",
+            sub: "24/12 • TDP An Thổ, Trà Câu",
+          },
+          {
+            id: "bride" as VenueSide,
+            title: "Nhà Gái • Thu Hiền",
+            sub: "15:00 23/12 • TDP An Thổ, Trà Câu",
+          },
+        ].map((item) => {
+          const isSelected = activeSide === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => handleSelectSide(item.id)}
+              style={{
+                backgroundColor: isSelected
+                  ? theme.accentText
+                  : "rgba(255, 232, 164, 0.1)",
+                color: isSelected ? theme.bgPrimary : theme.accentText,
+                borderColor: isSelected
+                  ? theme.accentText
+                  : "rgba(255, 232, 164, 0.3)",
+              }}
+              className="flex flex-col items-center justify-center py-2 px-2.5 rounded-xl border transition-all cursor-pointer shadow-xs"
+            >
+              <span className="inline-flex items-center gap-1 text-xs sm:text-[13px] font-fraunces font-bold whitespace-nowrap">
+                <MapPin className="w-3.5 h-3.5 shrink-0" />
+                <span>{item.title}</span>
+              </span>
+              <span className="text-[10px] font-serif opacity-85 whitespace-nowrap mt-0.5">
+                {item.sub}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
       {/* Full-Bleed Edge-to-Edge 3D Mapbox Container */}
       <div
         className="relative h-[290px] w-full max-w-[365px] overflow-hidden rounded-[16px] md:h-[380px] md:max-w-[490px] border-2 shadow-2xl bg-[#3A0000]"
@@ -363,30 +498,34 @@ export function MapboxWeddingVenue() {
 
               <button
                 type="button"
-                onClick={handleFlyToVenue}
+                onClick={handleShowBothVenues}
                 className="px-2.5 py-1 rounded-full bg-[#8C0000]/85 hover:bg-[#8C0000] backdrop-blur-xs border border-[#ffe8a4]/45 text-[11px] text-[#ffe8a4] font-serif font-medium flex items-center gap-1 cursor-pointer transition-colors shadow"
-                title="Bay 3D về tâm điểm lễ cưới"
+                title="Xem toàn cảnh cả Nhà Trai & Nhà Gái"
               >
                 <Compass className="w-3 h-3" />
-                <span>Tâm lễ cưới</span>
+                <span>Cả 2 nhà</span>
               </button>
             </div>
           </>
         ) : (
           <iframe
-            title="Bản đồ lễ cưới Phương Đông & Thu Hiền"
-            src={`https://maps.google.com/maps?q=${lat},${lng}&hl=vi&z=16&output=embed`}
+            key={activeSide}
+            title={`Bản đồ ${
+              activeSide === "groom" ? "Nhà Trai" : "Nhà Gái"
+            } Phương Đông & Thu Hiền`}
+            src={`https://maps.google.com/maps?q=${targetLat},${targetLng}&hl=vi&z=16&output=embed`}
             loading="lazy"
             className="absolute inset-0 w-full h-full border-0"
             allowFullScreen
           />
         )}
 
-        {/* Live Route Distance & Duration Pill (only shown after guest clicks Lộ trình) */}
+        {/* Live Route Distance & Duration Pill */}
         {routeSummary && (
           <div className="absolute bottom-2.5 left-2.5 right-2.5 z-10 px-3 py-1.5 rounded-xl bg-black/75 backdrop-blur-md border border-[#ffe8a4]/45 text-xs text-[#ffe8a4] font-serif flex items-center justify-between shadow-lg">
             <span>
-              Lộ trình: <strong>{routeSummary.distanceKm}</strong>
+              Tới {routeSummary.sideLabel}:{" "}
+              <strong>{routeSummary.distanceKm}</strong>
             </span>
             <span>
               Dự kiến: <strong>{routeSummary.durationText}</strong>
@@ -413,11 +552,13 @@ export function MapboxWeddingVenue() {
           ) : (
             <Route className="h-4 w-4 shrink-0" />
           )}
-          <span>Vẽ đường từ vị trí của bạn</span>
+          <span>
+            Vẽ đường tới {activeSide === "groom" ? "Nhà Trai" : "Nhà Gái"}
+          </span>
         </button>
 
         <a
-          href={INITIAL_WEDDING_DATA.googleMapsDirUrl}
+          href={targetGoogleMapsUrl}
           target="_blank"
           rel="noopener noreferrer"
           style={{
@@ -427,7 +568,9 @@ export function MapboxWeddingVenue() {
           className="inline-flex items-center gap-1.5 rounded-full px-5 py-2 text-xs md:text-sm font-serif font-bold transition-transform hover:scale-105 active:scale-95 shadow-lg"
         >
           <Navigation className="h-4 w-4 shrink-0" />
-          <span>Chỉ đường Google Maps</span>
+          <span>
+            Google Maps ({activeSide === "groom" ? "Nhà Trai" : "Nhà Gái"})
+          </span>
           <ExternalLink className="h-3.5 w-3.5 opacity-75" />
         </a>
       </div>
