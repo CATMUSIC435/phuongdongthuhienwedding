@@ -120,7 +120,7 @@ export const INITIAL_WEDDING_DATA = {
   // Nhà Gái (Tổ chức buổi chiều trước bữa - Thứ Tư 23/12/2026)
   brideSideDayOfWeek: "THỨ TƯ",
   brideSideDayNumber: "23",
-  brideSideTime: "16:00",
+  brideSideTime: "15:00",
   brideSideLunarDate: "Tức ngày 15 tháng 11 năm Bính Ngọ",
   brideSideVenueLabel: "Tại Tư Gia Nhà Gái",
   // Lịch Tháng 12 / 2026
@@ -185,7 +185,7 @@ export const INITIAL_WEDDING_DATA = {
   ] as DressCodeColor[],
   timeline: [
     {
-      time: "16:00",
+      time: "15:00",
       dayTag: "Chiều 23/12",
       title: "Tiệc cưới thân mật tại Nhà Gái",
       badge: "toast",

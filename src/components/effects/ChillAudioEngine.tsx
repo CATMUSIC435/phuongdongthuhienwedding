@@ -51,7 +51,7 @@ export function ChillAudioEngine() {
     <div style={{ display: "none" }} aria-hidden="true">
       <audio
         ref={audioElRef}
-        src="/TBAYE.aac"
+        src="/beautiful_in_white.mp3"
         loop
         preload={isPlayingMusic || isEnvelopeOpen ? "auto" : "none"}
       />

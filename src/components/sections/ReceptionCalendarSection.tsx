@@ -299,7 +299,7 @@ export function ReceptionCalendarSection() {
                             </div>
                           ) : isBrideDay ? (
                             <div
-                              title="Chiều 23/12/2026 (16:00): Tiệc Cưới Nhà Gái"
+                              title="Chiều 23/12/2026 (15:00): Tiệc Cưới Nhà Gái"
                               style={{
                                 opacity: inView ? 1 : 0,
                                 transform: inView ? "scale(1)" : "scale(1.8)",
@@ -333,7 +333,7 @@ export function ReceptionCalendarSection() {
                     style={{ color: theme.paperTextSecondary }}
                   >
                     <span className="inline-block w-2.5 h-2.5 rounded-full border-2 border-[#990000] bg-[#990000]/20" />
-                    <span>23/12 (Chiều 16:00): Tiệc Nhà Gái</span>
+                    <span>23/12 (Chiều 15:00): Tiệc Nhà Gái</span>
                   </span>
                   <span
                     className="inline-flex items-center gap-1"

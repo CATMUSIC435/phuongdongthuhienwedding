@@ -67,7 +67,7 @@ export const metadata: Metadata = {
     template: "%s | Lễ Thành Hôn Phương Đông & Thu Hiền",
   },
   description:
-    "Trân trọng kính mời Quý khách đến dự Lễ Thành Hôn của Phạm Phương Đông & Nguyễn Thị Thu Hiền vào Thứ Năm, ngày 24/12/2026 tại Xóm 3, An Thổ, Trà Câu, Quảng Ngãi (Tiệc Nhà Gái: 16:00 chiều Thứ Tư, 23/12/2026).",
+    "Trân trọng kính mời Quý khách đến dự Lễ Thành Hôn của Phạm Phương Đông & Nguyễn Thị Thu Hiền vào Thứ Năm, ngày 24/12/2026 tại Xóm 3, An Thổ, Trà Câu, Quảng Ngãi (Tiệc Nhà Gái: 15:00 chiều Thứ Tư, 23/12/2026).",
   keywords: [
     "Thiệp cưới Phương Đông Thu Hiền",
     "Phạm Phương Đông",
@@ -103,7 +103,7 @@ export const metadata: Metadata = {
     title:
       "Trân Trọng Kính Mời | Lễ Thành Hôn Phương Đông & Thu Hiền (24.12.2026)",
     description:
-      "Trân trọng kính mời Quý khách đến chung vui cùng hai gia đình tại Xóm 3, An Thổ, Trà Câu, Quảng Ngãi (Tiệc Nhà Gái: 16:00 chiều 23/12/2026 • Lễ Thành Hôn & Tiệc Nhà Trai: 09:30 & 11:00 ngày 24/12/2026).",
+      "Trân trọng kính mời Quý khách đến chung vui cùng hai gia đình tại Xóm 3, An Thổ, Trà Câu, Quảng Ngãi (Tiệc Nhà Gái: 15:00 chiều 23/12/2026 • Lễ Thành Hôn & Tiệc Nhà Trai: 09:30 & 11:00 ngày 24/12/2026).",
     images: [
       {
         url: "/images/photos/og-zalo.jpg?v=2",
@@ -132,8 +132,8 @@ const weddingEventJsonLd = {
   "@type": "SocialEvent",
   name: "Lễ Thành Hôn Phạm Phương Đông & Nguyễn Thị Thu Hiền",
   description:
-    "Lễ Thành Hôn của chú rể Phạm Phương Đông và cô dâu Nguyễn Thị Thu Hiền tại Xóm 3, An Thổ, Trà Câu, Quảng Ngãi (Tiệc Nhà Gái tổ chức lúc 16:00 chiều 23/12/2026).",
-  startDate: "2026-12-23T16:00:00+07:00",
+    "Lễ Thành Hôn của chú rể Phạm Phương Đông và cô dâu Nguyễn Thị Thu Hiền tại Xóm 3, An Thổ, Trà Câu, Quảng Ngãi (Tiệc Nhà Gái tổ chức lúc 15:00 chiều 23/12/2026).",
+  startDate: "2026-12-23T15:00:00+07:00",
   endDate: "2026-12-24T14:00:00+07:00",
   eventStatus: "https://schema.org/EventScheduled",
   eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",

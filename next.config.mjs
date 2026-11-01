@@ -44,7 +44,7 @@ const nextConfig = {
         ],
       },
       {
-        source: '/TBAYE.aac',
+        source: '/beautiful_in_white.mp3',
         headers: [
           {
             key: 'Cache-Control',
