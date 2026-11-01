@@ -42,12 +42,18 @@ export async function generateMetadata({
         "Trân trọng kính mời Quý khách đến chung vui cùng hai gia đình tại Xóm 3, An Thổ, Trà Câu, Quảng Ngãi (Tiệc Nhà Gái: 16:00 chiều 23/12/2026 • Lễ Thành Hôn & Tiệc Nhà Trai: 09:30 & 11:00 ngày 24/12/2026).",
       images: [
         {
-          url: "/images/photos/photo-1.jpg",
+          url: "/images/photos/og-zalo.jpg?v=2",
           width: 1200,
           height: 630,
+          type: "image/jpeg",
           alt: "Ảnh cưới Phạm Phương Đông & Nguyễn Thị Thu Hiền — 24/12/2026",
         },
       ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: pageTitle,
+      images: ["/images/photos/og-zalo.jpg?v=2"],
     },
   };
 }

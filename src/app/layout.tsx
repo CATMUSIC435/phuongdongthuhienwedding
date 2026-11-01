@@ -57,6 +57,10 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ||
+      "https://phuongdongthuhienwedding.vercel.app"
+  ),
   title: {
     default:
       "Thiệp Cưới Phạm Phương Đông & Nguyễn Thị Thu Hiền | 24.12.2026",
@@ -102,9 +106,10 @@ export const metadata: Metadata = {
       "Trân trọng kính mời Quý khách đến chung vui cùng hai gia đình tại Xóm 3, An Thổ, Trà Câu, Quảng Ngãi (Tiệc Nhà Gái: 16:00 chiều 23/12/2026 • Lễ Thành Hôn & Tiệc Nhà Trai: 09:30 & 11:00 ngày 24/12/2026).",
     images: [
       {
-        url: "/images/photos/photo-1.jpg",
+        url: "/images/photos/og-zalo.jpg?v=2",
         width: 1200,
         height: 630,
+        type: "image/jpeg",
         alt: "Ảnh cưới Phạm Phương Đông & Nguyễn Thị Thu Hiền — 24/12/2026",
       },
     ],
@@ -114,7 +119,7 @@ export const metadata: Metadata = {
     title: "Thiệp Cưới Phạm Phương Đông & Nguyễn Thị Thu Hiền | 24.12.2026",
     description:
       "Trân trọng kính mời Quý khách đến dự Lễ Thành Hôn của Phương Đông & Thu Hiền (Tiệc Nhà Gái: Chiều 23/12/2026 • Lễ Thành Hôn & Tiệc Nhà Trai: 24/12/2026 tại Trà Câu, Quảng Ngãi).",
-    images: ["/images/photos/photo-1.jpg"],
+    images: ["/images/photos/og-zalo.jpg?v=2"],
   },
   robots: {
     index: true,
