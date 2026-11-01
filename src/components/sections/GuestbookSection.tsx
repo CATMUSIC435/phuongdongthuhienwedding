@@ -1,13 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
-import confetti from "canvas-confetti";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Send, Wand2 } from "lucide-react";
 import { useWeddingStore } from "@/store/useWeddingStore";
 import { THEME_PALETTES } from "@/data/mockWeddingData";
 import { useScrollReveal } from "@/hooks/useScrollReveal";
 import { CrimsonFloralBackdrop } from "@/components/ui/CrimsonFloralBackdrop";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { ThankYouPopupModal } from "@/components/ui/ThankYouPopupModal";
+
+const wishFormSchema = z.object({
+  author: z
+    .string()
+    .trim()
+    .min(1, "Vui lòng nhập tên của bạn trước khi gửi.")
+    .max(120, "Tên tối đa 120 ký tự."),
+  message: z
+    .string()
+    .trim()
+    .min(1, "Vui lòng nhập nội dung lời chúc trước khi gửi.")
+    .max(2000, "Lời chúc tối đa 2000 ký tự."),
+});
+
+type WishFormValues = z.infer<typeof wishFormSchema>;
 
 export function GuestbookSection() {
   const { wishes, guestName, themeId, addWish, getNextAiWish, showToast } =
@@ -15,71 +33,61 @@ export function GuestbookSection() {
   const theme = THEME_PALETTES[themeId];
   const { ref, spring } = useScrollReveal({ threshold: 0.1 });
 
-  const [author, setAuthor] = useState(guestName || "");
-  const [message, setMessage] = useState("");
-  const [authorError, setAuthorError] = useState("");
-  const [messageError, setMessageError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [wandSpin, setWandSpin] = useState(false);
+  const [thankYouPopup, setThankYouPopup] = useState<{
+    isOpen: boolean;
+    author: string;
+    message: string;
+  }>({
+    isOpen: false,
+    author: "",
+    message: "",
+  });
 
-  const authorInputRef = React.useRef<HTMLInputElement>(null);
-  const messageInputRef = React.useRef<HTMLTextAreaElement>(null);
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    getValues,
+    formState: { errors, isSubmitting },
+  } = useForm<WishFormValues>({
+    resolver: zodResolver(wishFormSchema),
+    defaultValues: {
+      author: guestName || "",
+      message: "",
+    },
+  });
 
-  // Sync guestName into author field when loaded asynchronously from Google Sheet (?id=...)
-  React.useEffect(() => {
-    if (guestName && !author) {
-      setAuthor(guestName);
-      setAuthorError("");
+  // Sync guestName into author field when loaded from Google Sheet (?id=...)
+  useEffect(() => {
+    if (guestName && !getValues("author")?.trim()) {
+      setValue("author", guestName, { shouldValidate: true });
     }
-  }, [guestName, author]);
+  }, [guestName, getValues, setValue]);
 
   const handleGenerateAiWish = () => {
     setWandSpin(true);
     const suggestion = getNextAiWish();
-    setMessage(suggestion);
-    setMessageError("");
+    setValue("message", suggestion, {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
     setTimeout(() => setWandSpin(false), 380);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isSubmitting) return;
-
-    const cleanAuthor = author.trim();
-    const cleanMessage = message.trim();
-
-    if (!cleanAuthor) {
-      setAuthorError("Vui lòng nhập tên của bạn trước khi gửi.");
-      showToast("Vui lòng nhập tên của bạn trước khi gửi!");
-      authorInputRef.current?.focus();
-      return;
-    }
-
-    if (!cleanMessage) {
-      setMessageError("Vui lòng nhập nội dung lời chúc trước khi gửi.");
-      showToast("Vui lòng nhập nội dung lời chúc trước khi gửi!");
-      messageInputRef.current?.focus();
-      return;
-    }
-
-    setAuthorError("");
-    setMessageError("");
-    setIsSubmitting(true);
+  const onValidSubmit = async (data: WishFormValues) => {
+    const cleanAuthor = data.author.trim();
+    const cleanMessage = data.message.trim();
 
     addWish(cleanAuthor, cleanMessage);
-    setMessage("");
-    showToast("Đã gửi lời chúc tới Phương Đông & Thu Hiền!");
+    setValue("message", "", { shouldValidate: false });
 
-    try {
-      confetti({
-        particleCount: 45,
-        spread: 60,
-        origin: { y: 0.7 },
-        colors: ["#FFE8A4", "#FDCB9C", "#FFF9E6"],
-      });
-    } catch {
-      // ignore
-    }
+    // Mở popup cảm ơn có hiệu ứng chuyển động trang trọng
+    setThankYouPopup({
+      isOpen: true,
+      author: cleanAuthor,
+      message: cleanMessage,
+    });
 
     // Gửi lời chúc qua Gmail App Mail (phuongdongiot@gmail.com)
     try {
@@ -94,9 +102,11 @@ export function GuestbookSection() {
       });
     } catch {
       // ignore network error on client
-    } finally {
-      setIsSubmitting(false);
     }
+  };
+
+  const onInvalidSubmit = () => {
+    showToast("Vui lòng nhập đầy đủ tên và nội dung lời chúc trước khi gửi!");
   };
 
   return (
@@ -127,67 +137,53 @@ export function GuestbookSection() {
             className="mb-5"
           />
 
-          {/* Wish Form */}
+          {/* Wish Form validated with react-hook-form + zod */}
           <form
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onValidSubmit, onInvalidSubmit)}
             noValidate
             className="mt-4 mx-auto w-full max-w-full md:max-w-[600px]"
           >
             <div className="flex w-full flex-col gap-4">
               <div>
                 <input
-                  ref={authorInputRef}
                   type="text"
                   placeholder="Nhập tên của bạn *"
-                  value={author}
-                  onChange={(e) => {
-                    setAuthor(e.target.value);
-                    if (authorError && e.target.value.trim()) {
-                      setAuthorError("");
-                    }
-                  }}
                   maxLength={120}
-                  aria-invalid={Boolean(authorError)}
+                  aria-invalid={Boolean(errors.author)}
+                  {...register("author")}
                   style={{
-                    borderColor: authorError
+                    borderColor: errors.author
                       ? "#FF8080"
                       : `${theme.accentText}99`,
                     color: theme.accentText,
                   }}
                   className="w-full rounded-xl border bg-black/15 px-3.5 py-2.5 text-sm md:text-base placeholder:text-[#ffe8a4]/50 focus:outline-none focus:ring-2 focus:ring-[#ffe8a4]/60"
                 />
-                {authorError && (
+                {errors.author && (
                   <p className="mt-1.5 text-xs text-[#ffb3b3] font-medium">
-                    * {authorError}
+                    * {errors.author.message}
                   </p>
                 )}
               </div>
 
               <div>
                 <textarea
-                  ref={messageInputRef}
                   placeholder="Nhập lời chúc trăm năm hạnh phúc... *"
-                  value={message}
-                  onChange={(e) => {
-                    setMessage(e.target.value);
-                    if (messageError && e.target.value.trim()) {
-                      setMessageError("");
-                    }
-                  }}
                   rows={3}
                   maxLength={2000}
-                  aria-invalid={Boolean(messageError)}
+                  aria-invalid={Boolean(errors.message)}
+                  {...register("message")}
                   style={{
-                    borderColor: messageError
+                    borderColor: errors.message
                       ? "#FF8080"
                       : `${theme.accentText}99`,
                     color: theme.accentText,
                   }}
                   className="w-full rounded-xl border bg-black/15 px-3.5 py-2.5 text-sm md:text-base placeholder:text-[#ffe8a4]/50 focus:outline-none focus:ring-2 focus:ring-[#ffe8a4]/60 resize-none"
                 />
-                {messageError && (
+                {errors.message && (
                   <p className="mt-1.5 text-xs text-[#ffb3b3] font-medium">
-                    * {messageError}
+                    * {errors.message.message}
                   </p>
                 )}
               </div>
@@ -267,6 +263,17 @@ export function GuestbookSection() {
           </div>
         </div>
       </div>
+
+      {/* Animated Thank You Popup Modal */}
+      <ThankYouPopupModal
+        isOpen={thankYouPopup.isOpen}
+        onClose={() =>
+          setThankYouPopup((prev) => ({ ...prev, isOpen: false }))
+        }
+        variant="wish"
+        senderName={thankYouPopup.author}
+        message={thankYouPopup.message}
+      />
     </section>
   );
 }

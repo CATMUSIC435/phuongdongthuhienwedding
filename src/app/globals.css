@@ -88,6 +88,50 @@ body {
   }
 }
 
+@keyframes songhy-thankyou-pop {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0) scale(0.84);
+  }
+  65% {
+    opacity: 1;
+    transform: translate3d(0, -4px, 0) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes songhy-check-draw {
+  0% {
+    stroke-dashoffset: 60;
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes songhy-heart-rise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0) scale(0.5);
+  }
+  35% {
+    opacity: 0.95;
+    transform: translate3d(var(--hx, 8px), -14px, 0) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(var(--hx, 8px) * 1.6), -44px, 0) scale(0.75);
+  }
+}
+
 /* Blooming SVG Floral Keyframes */
 @keyframes songhy-petal-unfurl {
   0% {
