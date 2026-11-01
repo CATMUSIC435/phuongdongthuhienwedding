@@ -35,10 +35,26 @@ export function GuestbookSection() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!author.trim() || !message.trim()) return;
-    addWish(author, message);
+    const cleanAuthor = author.trim();
+    const cleanMessage = message.trim();
+    if (!cleanAuthor || !cleanMessage) return;
+
+    addWish(cleanAuthor, cleanMessage);
     setMessage("");
     showToast("Đã gửi lời chúc tới Phương Đông & Thu Hiền!");
+
+    // Gửi lời chúc qua Gmail App Mail
+    fetch("/api/wish", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "wish",
+        author: cleanAuthor,
+        message: cleanMessage,
+      }),
+    }).catch(() => {
+      // ignore network error on client
+    });
 
     try {
       confetti({

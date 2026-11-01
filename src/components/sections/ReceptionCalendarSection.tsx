@@ -41,17 +41,37 @@ export function ReceptionCalendarSection() {
 
   const handleRsvpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!rsvpName.trim()) return;
+    const cleanName = rsvpName.trim();
+    const cleanNotes = dietaryNotes.trim();
+    if (!cleanName) return;
+
     submitRsvp({
-      name: rsvpName.trim(),
+      name: cleanName,
       phone: rsvpPhone.trim(),
       attending,
       guestsCount,
       side,
-      dietaryNotes: dietaryNotes.trim(),
+      dietaryNotes: cleanNotes,
     });
     setSubmittedSuccess(true);
     showToast("Đã gửi xác nhận tham dự thành công! Cảm ơn quý khách.");
+
+    // Gửi thông báo xác nhận tham dự qua Gmail App Mail
+    fetch("/api/wish", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "rsvp",
+        name: cleanName,
+        attending,
+        guestsCount,
+        side,
+        dietaryNotes: cleanNotes,
+      }),
+    }).catch(() => {
+      // ignore network error on client
+    });
+
     try {
       confetti({
         particleCount: 55,
