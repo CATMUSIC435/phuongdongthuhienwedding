@@ -46,7 +46,7 @@ export function MapboxWeddingVenue() {
   const [isRouting, setIsRouting] = useState(false);
   const [routeSummary, setRouteSummary] = useState<RouteSummary | null>(null);
 
-  // Groom's Family (Nhà Trai): 14.878851, 108.9506447
+  // Groom's Family (Nhà Trai): 14.8787162, 108.955846
   const groomLng = INITIAL_WEDDING_DATA.venueLng;
   const groomLat = INITIAL_WEDDING_DATA.venueLat;
 

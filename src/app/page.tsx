@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { fetchGuestById } from "@/lib/fetchGuestFromSheet";
 import { WeddingClientPage } from "@/components/WeddingClientPage";
 
+export const dynamic = "force-dynamic";
+
 type SearchParamsMap = Promise<{
   [key: string]: string | string[] | undefined;
 }>;

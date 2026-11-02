@@ -46,11 +46,28 @@ export function WeddingClientPage({
   } = useWeddingStore();
   const theme = THEME_PALETTES[themeId];
 
-  // Hydrate store from SSR-resolved guest info (and open flag)
+  // Hydrate store from SSR-resolved guest info (and open flag), with client-side fallback for ?id=
   React.useEffect(() => {
     setGuestInfo(initialGuestName, initialGuestRelation);
     if (initialOpen) {
       finishOpenEnvelope();
+    }
+
+    if (!initialGuestName && typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      const idParam = (sp.get("id") || "").trim();
+      if (idParam) {
+        fetch(`/api/guest?id=${encodeURIComponent(idParam)}`, {
+          cache: "no-store",
+        })
+          .then((r) => r.json())
+          .then((data) => {
+            if (data?.name) {
+              setGuestInfo(data.name, initialGuestRelation);
+            }
+          })
+          .catch(() => {});
+      }
     }
   }, [
     initialGuestName,

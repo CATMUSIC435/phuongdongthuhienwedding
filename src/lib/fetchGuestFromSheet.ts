@@ -11,44 +11,84 @@ interface GvizRow {
   c?: (GvizCell | null)[];
 }
 
-// Stale-While-Revalidate in-memory cache + in-flight request deduplication
+// Short-lived in-memory cache + in-flight request deduplication
 let cachedRows: GvizRow[] | null = null;
 let cacheTimestamp = 0;
 let inFlightPromise: Promise<GvizRow[]> | null = null;
-const FRESH_TTL_MS = 30_000;
+const FRESH_TTL_MS = 5_000;
+
+function parseCsvRows(csvText: string): GvizRow[] {
+  const lines = csvText.split(/\r?\n/);
+  const rows: GvizRow[] = [];
+  for (const line of lines) {
+    if (!line.trim()) continue;
+    const commaIdx = line.indexOf(",");
+    if (commaIdx === -1) continue;
+    const colA = line
+      .slice(0, commaIdx)
+      .trim()
+      .replace(/^"|"$/g, "");
+    const colB = line
+      .slice(commaIdx + 1)
+      .trim()
+      .replace(/^"|"$/g, "")
+      .replace(/""/g, '"');
+    rows.push({
+      c: [{ v: colA, f: colA }, { v: colB, f: colB }],
+    });
+  }
+  return rows;
+}
 
 async function fetchSheetRowsFromNetwork(): Promise<GvizRow[]> {
   if (inFlightPromise) return inFlightPromise;
 
   inFlightPromise = (async () => {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2500);
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
     try {
-      const gvizUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json`;
+      const gvizUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/gviz/tq?tqx=out:json&headers=0`;
       const res = await fetch(gvizUrl, {
-        next: { revalidate: 30 },
+        cache: "no-store",
         signal: controller.signal,
         headers: {
           Accept: "application/json, text/plain, */*",
+          "Cache-Control": "no-cache",
         },
       });
 
-      if (!res.ok) {
-        return cachedRows || [];
+      if (res.ok) {
+        const rawText = await res.text();
+        const jsonStart = rawText.indexOf("{");
+        const jsonEnd = rawText.lastIndexOf("}");
+        if (jsonStart !== -1 && jsonEnd !== -1) {
+          const payload = JSON.parse(rawText.slice(jsonStart, jsonEnd + 1));
+          const rows: GvizRow[] = payload?.table?.rows || [];
+          if (rows.length > 0) {
+            cachedRows = rows;
+            cacheTimestamp = Date.now();
+            return rows;
+          }
+        }
       }
 
-      const rawText = await res.text();
-      const jsonStart = rawText.indexOf("{");
-      const jsonEnd = rawText.lastIndexOf("}");
-      if (jsonStart === -1 || jsonEnd === -1) {
-        return cachedRows || [];
+      // Fallback to CSV export if gviz endpoint fails or returns empty
+      const csvUrl = `https://docs.google.com/spreadsheets/d/${GOOGLE_SHEET_ID}/export?format=csv`;
+      const csvRes = await fetch(csvUrl, {
+        cache: "no-store",
+        signal: controller.signal,
+      });
+      if (csvRes.ok) {
+        const csvText = await csvRes.text();
+        const rows = parseCsvRows(csvText);
+        if (rows.length > 0) {
+          cachedRows = rows;
+          cacheTimestamp = Date.now();
+          return rows;
+        }
       }
 
-      const payload = JSON.parse(rawText.slice(jsonStart, jsonEnd + 1));
-      const rows: GvizRow[] = payload?.table?.rows || [];
-      cachedRows = rows;
-      cacheTimestamp = Date.now();
-      return rows;
+      return cachedRows || [];
     } catch {
       return cachedRows || [];
     } finally {
@@ -60,25 +100,7 @@ async function fetchSheetRowsFromNetwork(): Promise<GvizRow[]> {
   return inFlightPromise;
 }
 
-async function getSheetRows(): Promise<GvizRow[]> {
-  const now = Date.now();
-  if (cachedRows) {
-    // Stale-While-Revalidate: return cached rows in 0ms and refresh in background if older than 30s
-    if (now - cacheTimestamp >= FRESH_TTL_MS) {
-      fetchSheetRowsFromNetwork().catch(() => {});
-    }
-    return cachedRows;
-  }
-  return fetchSheetRowsFromNetwork();
-}
-
-export async function fetchGuestById(idParam?: string | null): Promise<string> {
-  const cleanId = (idParam || "").trim();
-  if (!cleanId) return "";
-
-  const rows = await getSheetRows();
-  const normalizedTarget = cleanId.toLowerCase();
-
+function findNameInRows(rows: GvizRow[], normalizedTarget: string): string {
   for (const row of rows) {
     const cells = row?.c;
     if (!cells || cells.length < 2) continue;
@@ -103,6 +125,22 @@ export async function fetchGuestById(idParam?: string | null): Promise<string> {
       return matchedName;
     }
   }
-
   return "";
+}
+
+export async function fetchGuestById(idParam?: string | null): Promise<string> {
+  const cleanId = (idParam || "").trim();
+  if (!cleanId) return "";
+
+  const normalizedTarget = cleanId.toLowerCase();
+  const now = Date.now();
+
+  // Check fresh cache first; if missing or stale, always fetch live from Google Sheet
+  if (cachedRows && now - cacheTimestamp < FRESH_TTL_MS) {
+    const cachedMatch = findNameInRows(cachedRows, normalizedTarget);
+    if (cachedMatch) return cachedMatch;
+  }
+
+  const freshRows = await fetchSheetRowsFromNetwork();
+  return findNameInRows(freshRows, normalizedTarget);
 }
