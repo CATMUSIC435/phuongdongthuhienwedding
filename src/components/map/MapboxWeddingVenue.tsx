@@ -182,7 +182,7 @@ export function MapboxWeddingVenue() {
     }).setHTML(
       `<div style="color:#5A0000;font-family:serif;text-align:center;line-height:1.25;white-space:nowrap;">
         <div style="font-weight:bold;font-size:10.5px;color:#8C0000;">囍 Nhà Trai • Phương Đông</div>
-        <div style="font-size:9px;opacity:0.85;">09:30 &amp; 11:00 • 24/12/2026</div>
+        <div style="font-size:9px;opacity:0.85;">08:30 &amp; 10:00 • 24/12/2026</div>
       </div>`
     );
     const groomMarker = new mapboxgl.Marker({ element: groomEl })

@@ -8,7 +8,6 @@ interface PixiPhotoCarouselProps {
   photos: WeddingPhotoItem[];
   activeIndex: number;
   onSelectIndex: (index: number) => void;
-  onOpenLightbox: (index: number) => void;
 }
 
 interface ManagedCardTexture {
@@ -185,21 +184,38 @@ export function PixiPhotoCarousel({
   photos,
   activeIndex,
   onSelectIndex,
-  onOpenLightbox,
 }: PixiPhotoCarouselProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const activeIndexRef = useRef(activeIndex);
+  const ringTargetRef = useRef(activeIndex);
   const onSelectRef = useRef(onSelectIndex);
-  const onLightboxRef = useRef(onOpenLightbox);
 
   useEffect(() => {
     activeIndexRef.current = activeIndex;
-  }, [activeIndex]);
+    const total = photos.length;
+    if (total <= 0) return;
+    const repeatFactor = total < 6 ? Math.ceil(6 / total) : 1;
+    const ringTotal = total * repeatFactor;
+    const prevRing = ringTargetRef.current;
+    const normalizedActive = ((activeIndex % total) + total) % total;
+
+    let bestCandidate = normalizedActive;
+    let bestAbsDiff = Infinity;
+    for (let r = 0; r < repeatFactor; r++) {
+      const candidate = r * total + normalizedActive;
+      let diff = (((candidate - prevRing) % ringTotal) + ringTotal) % ringTotal;
+      if (diff > ringTotal / 2) diff -= ringTotal;
+      if (Math.abs(diff) < bestAbsDiff) {
+        bestAbsDiff = Math.abs(diff);
+        bestCandidate = candidate;
+      }
+    }
+    ringTargetRef.current = bestCandidate;
+  }, [activeIndex, photos.length]);
 
   useEffect(() => {
     onSelectRef.current = onSelectIndex;
-    onLightboxRef.current = onOpenLightbox;
-  }, [onSelectIndex, onOpenLightbox]);
+  }, [onSelectIndex]);
 
   useEffect(() => {
     const container = hostRef.current;
@@ -256,7 +272,14 @@ export function PixiPhotoCarousel({
     const cardSprites: PIXI.Sprite[] = [];
     const managedCards: ManagedCardTexture[] = [];
 
-    photos.forEach((photo) => {
+    const totalPhotos = photos.length;
+    const repeatFactor = totalPhotos < 6 ? Math.ceil(6 / totalPhotos) : 1;
+    const ringPhotos = Array.from(
+      { length: totalPhotos * repeatFactor },
+      (_, idx) => photos[idx % totalPhotos]
+    );
+
+    ringPhotos.forEach((photo) => {
       const managed = createCardCanvasTexture(photo, isDisposed);
       managedCards.push(managed);
       const sprite = new PIXI.Sprite(managed.texture);
@@ -293,8 +316,8 @@ export function PixiPhotoCarousel({
     }
 
     // Smooth Drag & Tap Interaction
-    let continuousIndex = Number.isFinite(activeIndexRef.current)
-      ? activeIndexRef.current
+    let continuousIndex = Number.isFinite(ringTargetRef.current)
+      ? ringTargetRef.current
       : 0;
     let dragOffsetIndex = 0;
     let isDragging = false;
@@ -341,11 +364,9 @@ export function PixiPhotoCarousel({
       const deltaFromCenter = clickX - centerX;
       const centerCardHalfWidth = Math.min(rect.width * 0.32, 130);
 
-      if (Math.abs(deltaFromCenter) <= centerCardHalfWidth) {
-        onLightboxRef.current(activeIndexRef.current);
-      } else if (deltaFromCenter > centerCardHalfWidth) {
+      if (deltaFromCenter > centerCardHalfWidth) {
         onSelectRef.current((activeIndexRef.current + 1) % total);
-      } else {
+      } else if (deltaFromCenter < -centerCardHalfWidth) {
         onSelectRef.current((activeIndexRef.current - 1 + total) % total);
       }
     };
@@ -364,8 +385,8 @@ export function PixiPhotoCarousel({
       const screenH = app.screen.height || 380;
       const centerX = screenW / 2;
       const centerY = screenH / 2;
-      const total = photos.length;
-      if (total <= 0) return;
+      const ringTotal = cardSprites.length;
+      if (ringTotal <= 0) return;
 
       // Responsive base scale so center card fits 88% of stage height and <= 66% of stage width
       const maxCardH = screenH * 0.88;
@@ -373,20 +394,20 @@ export function PixiPhotoCarousel({
       const baseScale = Math.min(maxCardH / 780, maxCardW / 520);
       const spreadX = Math.min(screenW * 0.27, 135);
 
-      const target = (activeIndexRef.current || 0) + dragOffsetIndex;
-      let diff = (((target - continuousIndex) % total) + total) % total;
-      if (diff > total / 2) diff -= total;
+      const target = (ringTargetRef.current || 0) + dragOffsetIndex;
+      let diff = (((target - continuousIndex) % ringTotal) + ringTotal) % ringTotal;
+      if (diff > ringTotal / 2) diff -= ringTotal;
 
       continuousIndex += diff * 0.14 * safeDelta;
       if (!Number.isFinite(continuousIndex)) {
-        continuousIndex = activeIndexRef.current || 0;
+        continuousIndex = ringTargetRef.current || 0;
       }
 
       for (let i = 0; i < cardSprites.length; i++) {
         const sprite = cardSprites[i];
-        // Loop-free modular relative index in [-total/2, total/2]
-        let rel = (((i - continuousIndex) % total) + total) % total;
-        if (rel > total / 2) rel -= total;
+        // Loop-free modular relative index in [-ringTotal/2, ringTotal/2]
+        let rel = (((i - continuousIndex) % ringTotal) + ringTotal) % ringTotal;
+        if (rel > ringTotal / 2) rel -= ringTotal;
 
         const absRel = Math.abs(rel);
         const visible = absRel < 2.8;

@@ -7,7 +7,7 @@ import { useSpringTilt } from "@/hooks/useSpringTilt";
 import { BloomingFloralSvg } from "@/components/effects/BloomingFloralSvg";
 
 export function HeroArchSection() {
-  const { customGroomName, customBrideName, themeId, openLightbox } =
+  const { customGroomName, customBrideName, themeId } =
     useWeddingStore();
   const theme = THEME_PALETTES[themeId];
   const uid = useId().replace(/:/g, "");
@@ -97,18 +97,16 @@ export function HeroArchSection() {
             </div>
           </div>
 
-          {/* Oriental Double-Rect Arch SVG Frame (Interactive 3D Tilt + Click to Lightbox) */}
+          {/* Oriental Double-Rect Arch SVG Frame (Interactive 3D Tilt) */}
           <div
             ref={tiltRef}
             {...bind}
-            onClick={() => openLightbox(0)}
-            title="Nhấn để phóng to ảnh cưới"
             style={{
               aspectRatio: "321 / 527",
               transform: `perspective(1000px) rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale(${tilt.scale})`,
               transition: "transform 280ms cubic-bezier(0.22, 1, 0.36, 1)",
             }}
-            className="absolute left-[13.61%] top-[146px] sm:top-[151px] w-[72.79%] md:top-[205px] z-10 cursor-pointer group"
+            className="absolute left-[13.61%] top-[146px] sm:top-[151px] w-[72.79%] md:top-[205px] z-10 group"
           >
             <svg
               viewBox="0 0 321 527"

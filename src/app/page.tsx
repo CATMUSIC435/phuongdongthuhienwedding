@@ -39,7 +39,7 @@ export async function generateMetadata({
     openGraph: {
       title: pageTitle,
       description:
-        "Trân trọng kính mời Quý khách đến chung vui cùng hai gia đình tại Xóm 3, An Thổ, Trà Câu, Quảng Ngãi (Tiệc Nhà Gái: 15:00 chiều 23/12/2026 • Lễ Thành Hôn & Tiệc Nhà Trai: 09:30 & 11:00 ngày 24/12/2026).",
+        "Trân trọng kính mời Quý khách đến chung vui cùng hai gia đình tại Xóm 3, An Thổ, Trà Câu, Quảng Ngãi (Tiệc Nhà Gái: 15:00 chiều 23/12/2026 • Lễ Thành Hôn & Tiệc Nhà Trai: 08:30 & 10:00 ngày 24/12/2026).",
       images: [
         {
           url: "/images/photos/og-zalo.jpg?v=2",

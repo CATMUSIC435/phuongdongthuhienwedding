@@ -109,16 +109,16 @@ export const INITIAL_WEDDING_DATA = {
   announcementText:
     "Hai gia đình trân trọng báo tin lễ thành hôn của hai con chúng tôi",
   weddingDateDisplay: "24 tháng 12, 2026",
-  weddingDateISO: "2026-12-24T11:00:00+07:00",
+  weddingDateISO: "2026-12-24T10:00:00+07:00",
   // Nhà Trai (Chính lễ - Thứ Năm 24/12/2026)
   dayOfWeek: "THỨ NĂM",
   dayNumber: "24",
   monthLabel: "THÁNG 12",
   yearLabel: "2026",
   lunarDate: "Tức ngày 16 tháng 11 năm Bính Ngọ",
-  ceremonyTime: "09:30",
-  receptionTime: "11:00",
-  welcomeTime: "10:30",
+  ceremonyTime: "08:30",
+  receptionTime: "10:00",
+  welcomeTime: "09:30",
   // Nhà Gái (Tổ chức buổi chiều trước bữa - Thứ Tư 23/12/2026)
   brideSideDayOfWeek: "THỨ TƯ",
   brideSideDayNumber: "23",
@@ -146,7 +146,7 @@ export const INITIAL_WEDDING_DATA = {
   brideGoogleMapsDirUrl:
     "https://www.google.com/maps/dir/?api=1&destination=14.875863461851074,108.95685423178892",
   googleCalendarUrl:
-    "https://www.google.com/calendar/render?action=TEMPLATE&text=%C4%90%C3%A1m%20c%C6%B0%E1%BB%9Bi%20Ph%E1%BA%A1m%20Ph%C6%B0%C6%A1ng%20%C4%90%C3%B4ng%20%26%20Nguy%E1%BB%85n%20Th%E1%BB%8B%20Thu%20Hi%E1%BB%81n&dates=20261224T023000Z/20261224T070000Z&ctz=Asia/Ho_Chi_Minh&details=L%E1%BB%85%20th%C3%A0nh%20h%C3%B4n%20c%E1%BB%A7a%20Ph%E1%BA%A1m%20Ph%C6%B0%C6%A1ng%20%C4%90%C3%B4ng%20%26%20Nguy%E1%BB%85n%20Th%E1%BB%8B%20Thu%20Hi%E1%BB%81n%20t%E1%BA%A1i%20X%C3%B3m%203%2C%20An%20Th%E1%BB%95%2C%20Tr%C3%A0%20C%C3%A2u%2C%20Qu%E1%BA%A3ng%20Ng%C3%A3i%20(Nh%C3%A0%20g%C3%A1i%20t%E1%BB%95%20ch%E1%BB%A9c%20chi%E1%BB%81u%2023%2F12%2F2026)&location=14.878851,108.9506447",
+    "https://www.google.com/calendar/render?action=TEMPLATE&text=%C4%90%C3%A1m%20c%C6%B0%E1%BB%9Bi%20Ph%E1%BA%A1m%20Ph%C6%B0%C6%A1ng%20%C4%90%C3%B4ng%20%26%20Nguy%E1%BB%85n%20Th%E1%BB%8B%20Thu%20Hi%E1%BB%81n&dates=20261224T013000Z/20261224T060000Z&ctz=Asia/Ho_Chi_Minh&details=L%E1%BB%85%20th%C3%A0nh%20h%C3%B4n%20c%E1%BB%A7a%20Ph%E1%BA%A1m%20Ph%C6%B0%C6%A1ng%20%C4%90%C3%B4ng%20%26%20Nguy%E1%BB%85n%20Th%E1%BB%8B%20Thu%20Hi%E1%BB%81n%20t%E1%BA%A1i%20X%C3%B3m%203%2C%20An%20Th%E1%BB%95%2C%20Tr%C3%A0%20C%C3%A2u%2C%20Qu%E1%BA%A3ng%20Ng%C3%A3i%20(Nh%C3%A0%20g%C3%A1i%20t%E1%BB%95%20ch%E1%BB%A9c%20chi%E1%BB%81u%2023%2F12%2F2026)&location=14.878851,108.9506447",
   heroPhoto: "/images/photos/photo-1.jpg",
   photos: [
     {
@@ -158,31 +158,24 @@ export const INITIAL_WEDDING_DATA = {
     },
     {
       id: 2,
-      src: "/images/photos/photo-1.jpg",
+      src: "/images/photos/photo-2.jpg",
       caption: "Hạnh phúc vẹn tròn ngày chung đôi • 24/12/2026",
       source: "local",
-      objectPosition: "50% 20%",
+      objectPosition: "50% 35%",
     },
     {
       id: 3,
-      src: "/images/photos/photo-1.jpg",
+      src: "/images/photos/photo-3.jpg",
       caption: "Duyên khởi sắc son — Trọn đời bên nhau",
       source: "local",
-      objectPosition: "50% 50%",
+      objectPosition: "50% 35%",
     },
     {
       id: 4,
-      src: "/images/photos/photo-1.jpg",
-      caption: "Nắng ấm quê hương Trà Câu, Quảng Ngãi",
-      source: "local",
-      objectPosition: "45% 30%",
-    },
-    {
-      id: 5,
-      src: "/images/photos/photo-1.jpg",
+      src: "/images/photos/photo-4.jpg",
       caption: "Cùng nắm tay đi qua muôn mùa hoa nở",
       source: "local",
-      objectPosition: "55% 40%",
+      objectPosition: "50% 40%",
     },
   ] as WeddingPhotoItem[],
   dressCodeColors: [
@@ -199,28 +192,28 @@ export const INITIAL_WEDDING_DATA = {
       badge: "toast",
     },
     {
-      time: "08:00",
+      time: "07:00",
       dayTag: "Sáng 24/12",
       title: "Lễ Vu Quy tại Nhà Gái",
     },
     {
-      time: "09:00",
+      time: "08:00",
       dayTag: "24/12",
       title: "Đón dâu về Xóm 3, An Thổ, Trà Câu",
     },
     {
-      time: "09:30",
+      time: "08:30",
       dayTag: "24/12",
       title: "Lễ Thành Hôn tại Nhà Trai",
       badge: "ring",
     },
     {
-      time: "10:30",
+      time: "09:30",
       dayTag: "24/12",
       title: "Đón tiếp khách quý tại Nhà Trai",
     },
     {
-      time: "11:00",
+      time: "10:00",
       dayTag: "Trưa 24/12",
       title: "Khai tiệc & Nghi thức cắt bánh cưới",
       badge: "cake",
